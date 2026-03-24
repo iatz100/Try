@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body{
+      font-family: Arial;
+      background:#0f172a;
+      color:#fff;
+      text-align:center;
+    }
+
+    .box{
+      max-width:400px;
+      margin:60px auto;
+      background:#1e293b;
+      padding:25px;
+      border-radius:15px;
+    }
+
+    input,button{
+      width:100%;
+      padding:12px;
+      margin:10px 0;
+      border:none;
+      border-radius:10px;
+    }
+
+    button{
+      background:linear-gradient(45deg,#06b6d4,#3b82f6);
+      color:white;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>🔥 Admin Panel (FINAL)</h2>
+
+  <input id="user" placeholder="Username">
+  <input id="amount" type="number" placeholder="Amount">
+
+  <button onclick="addBalance()">➕ Add Balance</button>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// 🔥 Firebase Config (same as yours)
+const firebaseConfig = {
+  apiKey: "AIzaSyBbli26gFP9-JDBpxp3rqyXjrFNOBHtlJ4",
+  authDomain: "abcbdtf7.firebaseapp.com",
+  projectId: "abcbdtf7",
+  storageBucket: "abcbdtf7.firebasestorage.app",
+  messagingSenderId: "618184579753",
+  appId: "1:618184579753:android:e06d786574490a7a6a67b8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// 🔥 FINAL ADD FUNCTION
+window.addBalance = async () => {
+  let u = document.getElementById("user").value.trim();
+  let amt = Number(document.getElementById("amount").value);
+
+  if(!u || !amt){
+    alert("Fill all fields!");
+    return;
+  }
+
+  try {
+    // 🔹 MAIN PATH (users)
+    const ref1 = doc(db,"users",u);
+    const snap1 = await getDoc(ref1);
+
+    let old1 = snap1.exists() ? (snap1.data().balance || 0) : 0;
+    let newBal = old1 + amt;
+
+    await setDoc(ref1,{
+      username:u,
+      balance:newBal
+    });
+
+    // 🔹 EXTRA PATH (accounts)
+    const ref2 = doc(db,"accounts",u);
+    await setDoc(ref2,{
+      username:u,
+      balance:newBal
+    });
+
+    // 🔹 EXTRA PATH (wallet)
+    const ref3 = doc(db,"wallet",u);
+    await setDoc(ref3,{
+      username:u,
+      balance:newBal
+    });
+
+    alert("✅ Balance Added Successfully: " + newBal);
+
+  } catch(err){
+    alert("Error: " + err.message);
+  }
+}
+</script>
+
+</body>
+</html>
