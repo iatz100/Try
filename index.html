@@ -1,42 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Balance Panel</title>
+  <title>Firebase Admin</title>
 </head>
 <body style="background:#111;color:#fff;text-align:center;padding:50px;">
 
-<h2>🔥 Admin Balance Add</h2>
+<h2>🔥 Firebase Balance Add</h2>
 
-<input id="orderId" placeholder="Order ID"><br><br>
-<input id="trx" placeholder="Transaction ID"><br><br>
+<input id="user" placeholder="Username"><br><br>
+<input id="amount" type="number" placeholder="Amount"><br><br>
 
 <button onclick="addBalance()">Add Balance</button>
 
-<script>
-async function addBalance() {
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  let orderId = document.getElementById("orderId").value;
-  let trx = document.getElementById("trx").value;
+const firebaseConfig = {
+  apiKey: "AIzaSyBbli26gFP9-JDBpxp3rqyXjrFNOBHtlJ4",
+  authDomain: "abcbdtf7.firebaseapp.com",
+  projectId: "abcbdtf7",
+  storageBucket: "abcbdtf7.firebasestorage.app",
+  messagingSenderId: "618184579753",
+  appId: "1:618184579753:android:e06d786574490a7a6a67b8"
+};
 
-  if(!orderId || !trx){
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.addBalance = async () => {
+  let u = document.getElementById("user").value.trim();
+  let amt = Number(document.getElementById("amount").value);
+
+  if(!u || !amt){
     alert("Fill all fields!");
     return;
   }
 
-  const res = await fetch("https://168.aaapay1.com/api/setOrderTransferCode", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    credentials: "include", // 🔥 important
-    body: JSON.stringify({
-      orderId: orderId,
-      transferCode: trx
-    })
+  const ref = doc(db,"users",u);
+  const snap = await getDoc(ref);
+
+  let oldBalance = 0;
+  if(snap.exists()){
+    oldBalance = snap.data().balance || 0;
+  }
+
+  let newBalance = oldBalance + amt;
+
+  await setDoc(ref,{
+    username:u,
+    balance:newBalance
   });
 
-  const data = await res.json();
-  alert("Result: " + JSON.stringify(data));
+  alert("✅ New Balance: " + newBalance);
 }
 </script>
 
